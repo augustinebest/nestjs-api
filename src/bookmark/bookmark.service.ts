@@ -41,4 +41,25 @@ export class BookmarkService {
       },
     });
   }
+
+  async getABookmark(userId: number, bookmarkId: number) {
+    const bookmark = await this.prisma.bookmark.findFirst({
+      where: { id: bookmarkId, userId },
+    });
+    return bookmark;
+  }
+
+  async deleteABookmark(userId: number, bookmarkId: number) {
+    // get the bookmark by id
+    const bookmark = await this.prisma.bookmark.findUnique({
+      where: {
+        id: bookmarkId,
+      },
+    });
+    // check if user owns the bookmark
+    if (!bookmark || bookmark.userId !== userId) {
+      throw new ForbiddenException('This bookmark does not exists');
+    }
+    return this.prisma.bookmark.delete({ where: { id: bookmarkId } });
+  }
 }

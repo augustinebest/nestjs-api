@@ -171,7 +171,41 @@ describe('App e2e', () => {
           .expectStatus(201)
           .expectBodyContains(newBookmark.title)
           .expectBodyContains(newBookmark.link)
-          .inspect();
+          .stores('bookmarkId', 'id');
+      });
+    });
+
+    describe('Get a bookmark', () => {
+      it('Should get a bookmark', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withHeaders({ Authorization: 'Bearer $S{user_token}' })
+          .expectStatus(200)
+          .expectBodyContains('$S{bookmarkId}');
+      });
+    });
+
+    describe('Delete a bookmark', () => {
+      it('Should delete a bookmark', () => {
+        return pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withHeaders({ Authorization: 'Bearer $S{user_token}' })
+          .expectStatus(200)
+          .expectBodyContains('$S{bookmarkId}');
+      });
+
+      it('Should not delete a bookamrk that does not exist', () => {
+        return pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', '100')
+          .withHeaders({ Authorization: 'Bearer $S{user_token}' })
+          .expectStatus(403)
+          .expectJsonLike({ message: 'This bookmark does not exists' });
       });
     });
   });
